@@ -1,0 +1,12 @@
+pandas
+numpy
+matplotlib
+plotly
+scikit-learn
+requests
+nltk
+spacy
+emoji
+unidecode
+python-dotenv
+networkx
