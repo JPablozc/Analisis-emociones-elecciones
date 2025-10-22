@@ -1,0 +1,20 @@
+[
+  {
+    "name": "auth_token",
+    "value": "3fe5bf8bae43766e1fd54958617f0b6e5d63c3e5",
+    "domain": ".x.com",
+    "path": "/"
+  },
+  {
+    "name": "ct0",
+    "value": "8eeb41c5c2463c788e25553d0d11aca470e2f8b2f262e8585c0f764a155343d67fc4dc30d00039919be973d520af1a97664e95bd60ddddbe82431958cb9de0e7bb2b29269cd51423e9e20050c811daa9",
+    "domain": ".x.com",
+    "path": "/"
+  },
+  {
+    "name": "twid",
+    "value": "u%3D1656361817520652288",
+    "domain": ".x.com",
+    "path": "/"
+  }
+]
