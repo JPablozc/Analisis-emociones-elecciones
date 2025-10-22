@@ -10,3 +10,4 @@ emoji
 unidecode
 python-dotenv
 networkx
+snscrape
