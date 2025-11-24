@@ -60,14 +60,15 @@ Brinda una herramienta adaptable para:
 
 ## Metodología general
 
-| Fase | Descripción | Resultado esperado |
-|------|--------------|--------------------|
-| **1. Extracción** | Recolección de tuits relevantes mediante Playwright (hashtags, menciones, partidos, candidatos). | Dataset crudo en `data/raw/`. |
-| **2. Limpieza y filtrado** | Normalización del texto, eliminación de ruido y duplicados, preparación para análisis. | Datos limpios en `data/processed/`. |
-| **3. Análisis emocional** | Aplicación de modelos de IA y PLN para detectar emociones y sentimientos en español. | Base con etiquetas emocionales. |
-| **4. Indicadores e interpretación** | Cálculo de métricas agregadas (IAE, PA, RP, VE). | Métricas interpretables por tema o periodo. |
-| **5. Visualización** | Creación de un dashboard interactivo (Plotly, Dash o Power BI). | Visualización del clima emocional. |
-| **6. Reporte ético** | Documentación de fuentes, modelo y consideraciones éticas. | Reporte técnico y guía de uso. |
+| Fase | Descripción | Resultados principales |
+|------|-------------|------------------------|
+| **1. Ingesta (Scraping)** | Extracción autenticada de tuits en tiempo real mediante Playwright y cookies. Scroll dinámico, captura de texto y metadatos. | Base de datos cruda en SQLite (`twitter_data.db`). |
+| **2. Limpieza del texto** | Normalización, eliminación de ruido (URLs, emojis, menciones), deduplicación, tokenización inicial y estandarización. | `tweets_clean.csv` con texto preparado para análisis. |
+| **3. Feature Engineering** | Tokenización avanzada, stopwords especializadas, extracción de n_tokens, n_chars, hashtags, menciones; mapeo hashtag → candidato; sentimiento (POS/NEU/NEG) y emociones (alegría/ira/tristeza/miedo). | `tweets_features.csv` con variables lingüísticas y emocionales. |
+| **4. Topic Modeling (LDA)** | Vectorización optimizada, modelado de tópicos con LDA y asignación de `topic_id` a cada tuit. | `tweets_features_with_topics.csv` con temas políticos identificados. |
+| **5. Dataset GOLD** | Integración final de texto limpio, sentimiento, emociones, temas y features numéricos. Cálculo de métricas diarias por candidato. | `tweets_gold.csv` y `candidate_daily_metrics.csv` (dataset maestro). |
+| **6. Análisis exploratorio y estadístico** | Series temporales, distribución de emociones, nubes de palabras, comparaciones entre candidatos y temas, correlaciones. | Notebooks de análisis (`EDA`, `sentiment`, `topics`). |
+| **7. Visualización interactiva** | Dashboard en Streamlit con filtros por candidato, fecha, tema, KPIs emocionales, gráficas dinámicas y nube de palabras. | Aplicación lista para presentación y análisis político. |
 
 ---
 
@@ -75,42 +76,144 @@ Brinda una herramienta adaptable para:
 
 Analisis-emociones-elecciones/
 │
+├── configs/
+│   └── project.yaml
+│
 ├── data/
-│ ├── raw/
-│ │ └── twitter_data.db # Base de datos con tuits recolectados
-│ └── processed/
-│ └── tweets_clean.csv # Datos limpios listos para análisis
+│   ├── raw/
+│   │   └── twitter_data.db
+│   └── processed/
+│       ├── candidate_daily_metrics.csv
+│       ├── tweets_clean.csv
+│       ├── tweets_features.csv
+│       ├── tweets_features_with_topics.csv
+│       ├── tweets_gold.csv
+│       └── tweets_topics.csv
+│
+├── notebooks/
+│   ├── 01_EDA.ipynb
+│   ├── 02_sentiment_analysis.ipynb
+│   └── 03_topic_modeling.ipynb
 │
 ├── src/
-│ └── data/
-│ ├── ingest_playwright.py # Scraper con Playwright y cookies
-│ ├── database.py # Conexión y funciones SQLite
-│ └── clean.py # Limpieza y normalización del texto
+│   ├── data/
+│   │   ├── build_gold_dataset.py
+│   │   ├── clean.py
+│   │   ├── database.py
+│   │   └── ingest_playwright.py
+│   ├── features/
+│   │   └── build_features.py
+│   ├── models/
+│   │   └── topic_modeling.py
+│   └── visualization/
+│       └── dashboard_app.py
 │
-├── cookies_playwright.json # Cookies autenticadas para sesión de X
-├── requirements.txt # Dependencias del proyecto
-├── README.md # Documentación principal
-└── .env # Configuración de entorno
+├── cookies_playwright.json
+├── requirements.txt
+├── LICENSE
+└── README.md
+
+---
+## 🚀 Tecnologías utilizadas
+
+- **Python 3.10+**
+- **Playwright** → extracción autenticada desde X  
+- **SQLite** → almacenamiento de datos  
+- **NLTK / PySentimiento** → NLP y análisis emocional  
+- **scikit-learn** → Topic Modeling (LDA)  
+- **Plotly / Streamlit** → visualización interactiva  
+- **Matplotlib / WordCloud** → análisis exploratorio  
 
 ---
 
+## Pipeline de análisis
+
+### **Recolección de datos – Scraping con Playwright**
+- Inicio de sesión mediante cookies.  
+- Extracción desde hashtags, candidatos y términos políticos.  
+- Scroll dinámico y captura de tuits reales.  
+- Almacenamiento en SQLite.  
 
 ---
 
-## Progreso actual
-
-- [x] Extracción automática de tuits reales desde X mediante Playwright.  
-- [x] Limpieza, normalización y almacenamiento en base de datos SQLite.  
-- [x] Generación de CSV con texto procesado (`tweets_clean.csv`).  
-- [ ] Análisis emocional (en desarrollo).  
-- [ ] Dashboard de visualización (pendiente).  
-- [ ] Automatización diaria de scraping (pendiente).  
+### **Limpieza avanzada del texto**
+- Normalización (unicode, tildes, acentos).  
+- Eliminación de ruido:
+  - URLs  
+  - menciones  
+  - emojis  
+  - símbolos  
+- Deduplicación de tuits.  
+- Generación de datos limpios listos para análisis.
 
 ---
 
-## Próximos pasos
+### **Feature Engineering**
+- Tokenización avanzada específica para análisis político.  
+- Stopwords enriquecidas.  
+- Variables generadas:
+  - n_tokens  
+  - n_chars  
+  - n_mentions  
+  - n_hashtags  
+- Sentimiento: **positivo, negativo, neutral**  
+- Emociones: **alegría, ira, tristeza, miedo**  
+- Identificación del candidato asociado.
 
-1. Implementar la automatización de recolección diaria de datos.  
-2. Entrenar o aplicar modelos de análisis emocional en español (BETO o RoBERTuito).  
-3. Construir los indicadores propuestos (IAE, PA, RP, VE).  
-4. Diseñar el dashboard interactivo para la presentación final.
+---
+
+### **Topic Modeling (LDA)**
+- Vectorización optimizada para español.  
+- Identificación de 8 temas políticos principales.  
+- Inclusión del `topic_id` en cada tuit.
+
+---
+
+### **Dataset GOLD**
+Un dataset final completo que integra:
+
+- texto original y limpio  
+- sentimiento  
+- emociones  
+- tema asignado  
+- features numéricos  
+- candidato  
+- fecha  
+- métricas agregadas diarias
+
+---
+
+### **Dashboard interactivo**
+Incluye:
+
+- Filtros dinámicos por candidato, fecha y tema  
+- KPIs emocionales  
+- Gráficos por candidato  
+- Análisis temporal  
+- Distribución de temas  
+- Nube de palabras interactiva  
+
+---
+
+### Resultados clave
+
+- Emociones predominantes para cada candidato.  
+- Temas dominantes detectados por LDA.  
+- Cambios emocionales en el tiempo.  
+- Tensiones, polaridad y clima político.  
+- Visualizaciones dinámicas y listas para sustentación académica.
+
+---
+
+## Estado actual del proyecto
+
+| Módulo | Estado |
+|--------|--------|
+| Scraping | ✔ Finalizado |
+| Limpieza | ✔ Finalizado |
+| Feature Engineering | ✔ Finalizado |
+| Sentimiento & Emociones | ✔ Finalizado |
+| Topic Modeling | ✔ Finalizado |
+| Dataset GOLD | ✔ Finalizado |
+| Dashboard interactivo | ✔ Finalizado |
+| Optimización continua | 🔧 En progreso |

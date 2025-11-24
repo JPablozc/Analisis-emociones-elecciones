@@ -1,0 +1,13 @@
+project_name: "Analisis de Emociones Políticas en Redes Sociales"
+country: "CO"
+date_range:
+  start: "2024-01-01"
+  end: "2025-12-31"
+platforms: ["x"]
+targets:
+  candidates: ["candidato_a", "candidato_b"]
+  parties: ["partido_x", "partido_y"]
+emotions: ["alegria","confianza","miedo","ira","tristeza","sorpresa","asco","anticipacion"]
+paths:
+  raw: "data/raw"
+  processed: "data/processed"

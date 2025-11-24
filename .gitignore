@@ -8,3 +8,4 @@ data/raw/
 data/interim/
 data/processed/
 reports/figures/
+cookies_playwright.json
